@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Clay Shooting Game | Scratch Quick Quiz</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+      :root {
+        --purple: #5e48c4;
+        --pale: #eae7fe;
+        --ghost: #f5f4ff;
+        --yellow: #ffd071;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #100a20;
+        color: #1a1a1a;
+        font-family: Poppins, sans-serif;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        min-height: 100vh;
+        justify-content: center;
+      }
+      .header {
+        width: min(1280px, 100%);
+        background: var(--purple);
+        border-radius: 14px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        gap: 12px;
+        font-weight: 800;
+      }
+      .logo {
+        background: var(--yellow);
+        color: #1a1a1a;
+        padding: 9px 15px;
+        border-radius: 10px;
+        font-size: 13px;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .score {
+        font-size: 14px;
+        background: #4a3aad;
+        padding: 10px 14px;
+        border-radius: 10px;
+      }
+      .score span {
+        color: var(--yellow);
+      }
+      .wrap {
+        width: 1280px;
+        margin-top: 12px;
+        transform-origin: top center;
+      }
+      .stage {
+        width: 1280px;
+        height: 720px;
+        background: white;
+        border-radius: 26px;
+        position: relative;
+        overflow: hidden;
+      }
+      .slide {
+        display: none;
+        position: absolute;
+        inset: 0;
+        padding: 50px 65px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+      }
+      .slide.active {
+        display: flex;
+      }
+      .badge {
+        background: var(--ghost);
+        border: 2px solid var(--pale);
+        color: var(--purple);
+        border-radius: 25px;
+        padding: 9px 20px;
+        font-size: 14px;
+        font-weight: 800;
+        margin-bottom: 20px;
+      }
+      h1 {
+        font-size: 48px;
+        line-height: 1.25;
+        margin: 12px 0 22px;
+      }
+      h2 {
+        font-size: 29px;
+        margin: 12px 0 20px;
+      }
+      .subtitle {
+        font-size: 17px;
+        color: #555;
+        margin: 0 0 28px;
+      }
+      .btn {
+        border: 0;
+        border-radius: 14px;
+        padding: 15px 30px;
+        background: var(--yellow);
+        font: 800 17px Poppins;
+        cursor: pointer;
+      }
+      .btn:hover {
+        filter: brightness(0.96);
+      }
+      .next {
+        background: var(--purple);
+        color: white;
+        margin-top: 15px;
+        visibility: hidden;
+      }
+      .next.visible {
+        visibility: visible;
+      }
+      .question {
+        background: var(--ghost);
+        border: 2px solid var(--pale);
+        border-radius: 22px;
+        padding: 17px 28px;
+        width: 850px;
+        max-width: 100%;
+      }
+      .question h2 {
+        margin: 0;
+        font-size: 27px;
+      }
+      .code {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 0;
+        margin: 19px 0;
+      }
+      .block {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: white;
+        font:
+          500 19px Arial,
+          sans-serif;
+        padding: 11px 18px;
+        border-radius: 7px;
+        box-shadow: inset 0 -3px #0002;
+        min-height: 46px;
+      }
+      .block.event {
+        background: #ffbf00;
+        color: #fff;
+        border-radius: 20px 20px 5px 5px;
+      }
+      .block.variable {
+        background: #ff8c1a;
+      }
+      .block.control {
+        background: #ffab19;
+      }
+      .block.motion {
+        background: #4c97ff;
+      }
+      .block b {
+        font-weight: 500;
+        background: #ffffff2a;
+        border-radius: 5px;
+        padding: 3px 7px;
+      }
+      .block em {
+        font-style: normal;
+        background: #fff;
+        color: #333;
+        border-radius: 20px;
+        padding: 4px 10px;
+      }
+      .options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        width: 900px;
+        margin-top: 10px;
+      }
+      .option {
+        background: white;
+        border: 2px solid var(--pale);
+        border-radius: 17px;
+        min-height: 103px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 14px;
+        font: 700 20px Poppins;
+      }
+      .option:hover:not(:disabled) {
+        border-color: var(--purple);
+        background: var(--ghost);
+      }
+      .option.correct {
+        border: 3px solid #22c55e;
+        background: #f0fdf4;
+      }
+      .option.wrong {
+        border: 3px solid #ed5661;
+        background: #fff0f1;
+      }
+      .option:disabled {
+        cursor: default;
+      }
+      .option .block {
+        font-size: 17px;
+      }
+      .feedback {
+        min-height: 48px;
+        margin-top: 15px;
+        padding: 10px 18px;
+        border-radius: 12px;
+        visibility: hidden;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .feedback.show {
+        visibility: visible;
+        background: #f0fdf4;
+        color: #166534;
+      }
+      .feedback.try {
+        background: #fff0f1;
+        color: #993040;
+      }
+      .scene {
+        font-size: 58px;
+        margin: 22px 0;
+      }
+      .scene.small {
+        font-size: 30px;
+        margin: 16px 0;
+      }
+      .arrow {
+        color: var(--purple);
+      }
+      .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .nav button {
+        background: #2a1c68;
+        color: var(--yellow);
+        border: 2px solid var(--purple);
+        padding: 10px 20px;
+        border-radius: 12px;
+        font: 700 14px Poppins;
+        cursor: pointer;
+      }
+      .nav button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      .final {
+        background: #fff3cc;
+        border: 2px solid var(--yellow);
+        padding: 20px 65px;
+        border-radius: 24px;
+        margin: 15px 0;
+      }
+      .final strong {
+        font-size: 49px;
+        color: var(--purple);
+        display: block;
+      }
+      .smallnote {
+        font-size: 13px;
+        color: #666;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <span class="logo">ALPHAGEN LEARNING</span
+        ><span>Scratch – Clay Shooting Game</span>
+      </div>
+      <div class="score">★ Score: <span id="score">0</span> / 50</div>
+    </header>
+    <div class="wrap" id="wrap">
+      <main class="stage">
+        <section class="slide active" id="slide-1">
+          <div class="badge">SCRATCH POST-BREAK QUIZ</div>
+          <h1>
+            Clay Shooting<br /><span style="color: var(--purple)"
+              >Quick Challenge!</span
+            >
+          </h1>
+          
+          <button class="btn" onclick="go(2)">Start Quiz →</button>
+        </section>
+        <section class="slide" id="slide-2">
+          <div class="badge">QUESTION 1 OF 5 · 10 POINTS</div>
+          <div class="question"><h2>What happens to the score?</h2></div>
+          <div class="code">
+            <span class="block event">when green flag clicked</span
+            ><span class="block variable">set <b>score</b> to <em>0</em></span
+            ><span class="block variable"
+              >change <b>score</b> by <em>1</em></span
+            >
+          </div>
+          <div class="options" id="options-1">
+            <button class="option" onclick="answer(1, 0, this)">
+              <span style="font-size: 30px">0</span></button
+            ><button class="option" onclick="answer(1, 1, this)">
+              <span style="font-size: 30px">1</span></button
+            ><button class="option" onclick="answer(1, 2, this)">
+              <span style="font-size: 30px">2</span></button
+            ><button class="option" onclick="answer(1, 3, this)">
+              <span style="font-size: 30px">10</span>
+            </button>
+          </div>
+          <div class="feedback" id="feedback-1"></div>
+          <button class="btn next" id="next-1" onclick="go(3)">
+            Next Question →
+          </button>
+        </section>
+        <section class="slide" id="slide-3">
+          <div class="badge">QUESTION 2 OF 5 · 10 POINTS</div>
+          <div class="question"><h2>Which block moves the clay RIGHT?</h2></div>
+          <div class="scene">🎯 <span class="arrow">→</span> 🟠</div>
+          <div class="options" id="options-2">
+            <button class="option" onclick="answer(2, 0, this)">
+              <span class="block motion">change x by <em>10</em></span></button
+            ><button class="option" onclick="answer(2, 1, this)">
+              <span class="block motion">change x by <em>-10</em></span></button
+            ><button class="option" onclick="answer(2, 2, this)">
+              <span class="block motion">change y by <em>10</em></span></button
+            ><button class="option" onclick="answer(2, 3, this)">
+              <span class="block motion">change y by <em>-10</em></span>
+            </button>
+          </div>
+          <div class="feedback" id="feedback-2"></div>
+          <button class="btn next" id="next-2" onclick="go(4)">
+            Next Question →
+          </button>
+        </section>
+        <section class="slide" id="slide-4">
+          <div class="badge">QUESTION 3 OF 5 · 10 POINTS</div>
+          <div class="question"><h2>How many times will the clay move?</h2></div>
+          <div class="code">
+            <span class="block control">repeat <em>3</em></span>
+            <span class="block motion" style="margin-left:28px">move <em>10</em> steps</span>
+          </div>
+          <div class="options" id="options-3">
+            <button class="option" onclick="answer(3, 0, this)">1 time</button>
+            <button class="option" onclick="answer(3, 1, this)">2 times</button>
+            <button class="option" onclick="answer(3, 2, this)">3 times</button>
+            <button class="option" onclick="answer(3, 3, this)">10 times</button>
+          </div>
+          <div class="feedback" id="feedback-3"></div>
+          <button class="btn next" id="next-3" onclick="go(5)">
+            Next Question →
+          </button>
+        </section>
+        <section class="slide" id="slide-5">
+          <div class="badge">QUESTION 4 OF 5 · 10 POINTS</div>
+          <div class="question"><h2>Fix the score bug!</h2></div>
+          <div class="scene small">Hit the clay! 🎯 +1 point</div>
+          <div class="code">
+            <span class="block event">when this sprite clicked</span
+            ><span class="block variable"
+              >change <b>score</b> by <em>-1</em></span
+            >
+          </div>
+          <div class="options" id="options-4">
+            <button class="option" onclick="answer(4, 0, this)">
+              <span class="block variable"
+                >change <b>score</b> by <em>-1</em></span
+              ></button
+            ><button class="option" onclick="answer(4, 1, this)">
+              <span class="block variable"
+                >change <b>score</b> by <em>0</em></span
+              ></button
+            ><button class="option" onclick="answer(4, 2, this)">
+              <span class="block variable"
+                >change <b>score</b> by <em>1</em></span
+              ></button
+            ><button class="option" onclick="answer(4, 3, this)">
+              <span class="block variable">set <b>score</b> to <em>0</em></span>
+            </button>
+          </div>
+          <div class="feedback" id="feedback-4"></div>
+          <button class="btn next" id="next-4" onclick="go(6)">
+            Next Question →
+          </button>
+        </section>
+        <section class="slide" id="slide-6">
+          <div class="badge">QUESTION 5 OF 5 · 10 POINTS</div>
+          <div class="question"><h2>The target moves only when BOTH conditions are true. Will it move?</h2></div>
+          <div class="scene small">Space pressed: YES &nbsp; | &nbsp; Game started: NO</div>
+          <div class="code">
+            <span class="block" style="background:#59c059">Space pressed <b>and</b> Game started</span>
+          </div>
+          <div class="options" id="options-5">
+            <button class="option" onclick="answer(5, 0, this)">Yes, because Space is pressed</button>
+            <button class="option" onclick="answer(5, 1, this)">No, both must be true</button>
+            <button class="option" onclick="answer(5, 2, this)">Yes, because the game has stopped</button>
+            <button class="option" onclick="answer(5, 3, this)">It moves twice</button>
+          </div>
+          <div class="feedback" id="feedback-5"></div>
+          <button class="btn next" id="next-5" onclick="go(7)">
+            See My Score →
+          </button>
+        </section>
+        <section class="slide" id="slide-7">
+          <div class="badge">QUIZ COMPLETE!</div>
+          <h1>
+            Great Job,<br /><span style="color: var(--purple)"
+              >Scratch Creator!</span
+            >
+          </h1>
+          <div class="final">
+            YOUR SCORE<strong id="final-score">0 / 50</strong>
+          </div>
+          <p class="subtitle" id="message">
+            Keep creating and trying new ideas!
+          </p>
+          <button class="btn" onclick="resetQuiz()">↻ Try Again</button>
+        </section>
+      </main>
+      <nav class="nav">
+        <button id="prev" onclick="move(-1)">← Previous</button
+        ><span id="counter">Slide 1 / 7</span
+        ><button id="forward" onclick="move(1)">Next →</button>
+      </nav>
+    </div>
+    <script>
+      let current = 1,
+        score = 0,
+        answered = {};
+      const keys = [1, 0, 2, 2, 1];
+      const explanations = [
+        "The score starts at 0, then increases by 1.",
+        "Positive x moves the clay to the right.",
+        "Repeat 3 runs the move block three times.",
+        "Change score by 1 adds one point.",
+        "AND needs both conditions to be true. The game has not started yet.",
+      ];
+      function celebrate(n) {
+        if (typeof confetti === "function")
+          confetti({ particleCount: n, spread: 70, origin: { y: 0.65 } });
+      }
+      function update() {
+        document
+          .querySelectorAll(".slide")
+          .forEach((s, i) => s.classList.toggle("active", i + 1 === current));
+        document.getElementById("prev").disabled = current === 1;
+        document.getElementById("forward").disabled =
+          current === 7 ||
+          (current >= 2 && current <= 6 && !answered[current - 1]);
+        document.getElementById("counter").textContent = `Slide ${current} / 7`;
+        if (current === 7) {
+          document.getElementById("final-score").textContent = score + " / 50";
+          document.getElementById("message").textContent =
+            score === 50
+              ? "Amazing! You are a Scratch superstar!"
+              : score >= 30
+                ? "Wonderful work! Keep building fun games!"
+                : "You did it! Every try helps you grow as a coder!";
+          celebrate(120);
+        }
+      }
+      function go(n) {
+        if (n < 1 || n > 7) return;
+        if (
+          n > current &&
+          current >= 2 &&
+          current <= 6 &&
+          !answered[current - 1]
+        )
+          return;
+        current = n;
+        update();
+      }
+      function move(d) {
+        go(current + d);
+      }
+      function answer(q, choice, btn) {
+        if (answered[q]) return;
+        answered[q] = true;
+        const correct = choice === keys[q - 1];
+        const opts = [
+          ...document.querySelectorAll("#options-" + q + " .option"),
+        ];
+        opts.forEach((o) => (o.disabled = true));
+        btn.classList.add(correct ? "correct" : "wrong");
+        if (!correct) opts[keys[q - 1]].classList.add("correct");
+        if (correct) {
+          score += 10;
+          document.getElementById("score").textContent = score;
+          celebrate(30);
+        }
+        const fb = document.getElementById("feedback-" + q);
+        fb.className = "feedback show" + (correct ? "" : " try");
+        fb.textContent =
+          (correct ? "Great! +10 points. " : "Nice try! ") +
+          explanations[q - 1];
+        document.getElementById("next-" + q).classList.add("visible");
+        update();
+      }
+      function resetQuiz() {
+        score = 0;
+        answered = {};
+        document.getElementById("score").textContent = "0";
+        for (let q = 1; q <= 5; q++) {
+          document
+            .querySelectorAll("#options-" + q + " .option")
+            .forEach((o) => {
+              o.disabled = false;
+              o.classList.remove("correct", "wrong");
+            });
+          document.getElementById("feedback-" + q).className = "feedback";
+          document.getElementById("feedback-" + q).textContent = "";
+          document.getElementById("next-" + q).classList.remove("visible");
+        }
+        current = 1;
+        update();
+      }
+      function scale() {
+        const s = Math.min(1, (innerWidth - 24) / 1280);
+        const w = document.getElementById("wrap");
+        w.style.transform = `scale(${s})`;
+        w.style.marginBottom = 732 * s - 732 + "px";
+      }
+      window.addEventListener("resize", scale);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") move(1);
+        if (e.key === "ArrowLeft") move(-1);
+      });
+      scale();
+      update();
+    </script>
+  </body>
+</html>
